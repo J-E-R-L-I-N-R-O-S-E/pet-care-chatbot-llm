@@ -1,0 +1,122 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "keywords": ["hi", "hello", "hey", "hii", "hlo"],
+      "responses": [
+        "Hello! How can I help with your pet today? 🐾",
+        "Hi there! Ask me anything about your pet 🐶🐱",
+        "Hey! I'm your pet care assistant 😊"
+      ]
+    },
+
+    {
+      "tag": "dog_food",
+      "keywords": ["dog", "puppy", "food", "eat", "feed", "diet"],
+      "responses": [
+        "Dogs need a balanced diet with protein, carbs, and fats.",
+        "Feed your dog high-quality dog food twice a day.",
+        "Puppies need frequent meals with high nutrition.",
+        "Avoid giving chocolate, grapes, or onions to dogs."
+      ]
+    },
+
+    {
+      "tag": "cat_food",
+      "keywords": ["cat", "kitten", "food", "eat", "feed", "diet"],
+      "responses": [
+        "Cats need protein-rich food like fish or chicken.",
+        "Avoid giving milk to adult cats.",
+        "Kittens need small frequent meals.",
+        "Always provide fresh water for your cat."
+      ]
+    },
+
+    {
+      "tag": "dog_vaccine",
+      "keywords": ["dog", "puppy", "vaccine", "vaccination", "rabies", "shot"],
+      "responses": [
+        "Dogs need vaccines like rabies, distemper, and parvovirus.",
+        "Puppies should start vaccinations at 6-8 weeks.",
+        "Consult a vet for a proper vaccination schedule."
+      ]
+    },
+
+    {
+      "tag": "cat_vaccine",
+      "keywords": ["cat", "kitten", "vaccine", "vaccination", "rabies", "shot"],
+      "responses": [
+        "Cats need vaccines like rabies and FVRCP.",
+        "Kittens require multiple vaccine doses early.",
+        "Consult a vet for a vaccination schedule."
+      ]
+    },
+
+    {
+      "tag": "dog_bath",
+      "keywords": ["dog", "puppy", "bath", "clean", "shampoo"],
+      "responses": [
+        "Bathe your dog once every 2–4 weeks.",
+        "Use pet-safe shampoo only.",
+        "Avoid over-bathing as it dries their skin."
+      ]
+    },
+
+    {
+      "tag": "cat_bath",
+      "keywords": ["cat", "kitten", "bath", "clean"],
+      "responses": [
+        "Cats usually clean themselves, so baths are rare.",
+        "Only bathe cats when necessary.",
+        "Use mild pet-safe shampoo if needed."
+      ]
+    },
+
+    {
+      "tag": "dog_health",
+      "keywords": ["dog", "sick", "ill", "vomit", "health"],
+      "responses": [
+        "If your dog is sick, consult a vet immediately.",
+        "Watch for symptoms like vomiting, weakness, or loss of appetite."
+      ]
+    },
+
+    {
+      "tag": "cat_health",
+      "keywords": ["cat", "sick", "ill", "vomit", "health"],
+      "responses": [
+        "If your cat is sick, consult a vet.",
+        "Look for changes in eating or behavior."
+      ]
+    },
+
+    {
+      "tag": "cat_litter",
+      "keywords": ["cat", "litter", "toilet", "pee", "poop"],
+      "responses": [
+        "Keep the litter box clean and odor-free.",
+        "Cats prefer quiet and private litter areas."
+      ]
+    },
+
+    {
+      "tag": "general_pet_care",
+      "keywords": ["pet", "care", "tips", "advice"],
+      "responses": [
+        "Provide proper food, hygiene, and love.",
+        "Regular vet visits keep pets healthy.",
+        "Keep your pet environment clean and safe."
+      ]
+    },
+
+    {
+      "tag": "fallback",
+      "keywords": [],
+      "responses": [
+        "I didn't understand that. Try asking about pet food, health, or care 🐾",
+        "Can you rephrase your question? 😊",
+        "I'm here to help with pet care questions!"
+      ]
+    }
+  ]
+}
