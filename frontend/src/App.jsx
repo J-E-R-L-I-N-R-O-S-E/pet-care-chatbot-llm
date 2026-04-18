@@ -35,76 +35,73 @@ function App() {
   }, [typing]);
 
   const sendMessage = async () => {
-  if (!message.trim()) return;
+    if (!message.trim()) return;
 
-  const cleanMessage = message.trim().toLowerCase();
+    const userInput = message.trim();
 
-  const userMsg = {
-    sender: "user",
-    text: cleanMessage,
-    time: new Date().toLocaleTimeString()
-  };
-
-  setChats((prev) =>
-  prev.map((chat) => {
-    if (chat.id === currentChatId) {
-      const isFirstMessage = chat.messages.length === 0;
-
-      return {
-        ...chat,
-        name: isFirstMessage
-          ? cleanMessage
-              .split(" ")
-              .slice(0, 2)
-              .join(" ")
-              .replace(/\b\w/g, (c) => c.toUpperCase())
-          : chat.name,
-        messages: [...chat.messages, userMsg]
-      };
-    }
-    return chat;
-  })
-);
-  setTyping(true);
-
-  try {
-    const BASE_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "";
-
-const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message: cleanMessage })
-    });
-
-    const data = await res.json();
-
-    const botMsg = {
-      sender: "bot",
-      text: data.reply,
+    const userMsg = {
+      sender: "user",
+      text: userInput,
       time: new Date().toLocaleTimeString()
     };
 
     setChats((prev) =>
-      prev.map((chat) =>
-        chat.id === currentChatId
-          ? { ...chat, messages: [...chat.messages, botMsg] }
-          : chat
-      )
+      prev.map((chat) => {
+        if (chat.id === currentChatId) {
+          const isFirstMessage = chat.messages.length === 0;
+          return {
+            ...chat,
+            name: isFirstMessage
+              ? userInput
+                  .split(" ")
+                  .slice(0, 2)
+                  .join(" ")
+                  .replace(/\b\w/g, (c) => c.toUpperCase())
+              : chat.name,
+            messages: [...chat.messages, userMsg]
+          };
+        }
+        return chat;
+      })
     );
 
-  } catch (error) {
-    console.error("Chat error:", error);
-    alert("Backend not responding ❌");
-  }
+    setTyping(true);
+    setMessage("");
 
-  setTyping(false); // ✅ important
-  setMessage("");
-};
+    try {
+      const BASE_URL =
+        window.location.hostname === "localhost"
+          ? "http://localhost:5001"
+          : "";
+
+      const res = await fetch(`${BASE_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userInput })
+      });
+
+      const data = await res.json();
+
+      const botMsg = {
+        sender: "bot",
+        text: data.reply,
+        time: new Date().toLocaleTimeString()
+      };
+
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === currentChatId
+            ? { ...chat, messages: [...chat.messages, botMsg] }
+            : chat
+        )
+      );
+    } catch (error) {
+      console.error("Chat error:", error);
+      alert("Backend not responding ❌");
+    }
+
+    setTyping(false);
+  };
 
   const createNewChat = () => {
     const newChat = {
@@ -112,27 +109,25 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
       name: `Chat ${chats.length + 1}`,
       messages: []
     };
-
     setChats((prev) => [...prev, newChat]);
     setCurrentChatId(newChat.id);
   };
 
   const deleteChat = (id) => {
     const updated = chats.filter((chat) => chat.id !== id);
-    setChats(updated.length ? updated : [{ id: Date.now(), name: "Chat 1", messages: [] }]);
-    if (id === currentChatId && updated.length) {
-      setCurrentChatId(updated[0].id);
+    const fallback = [{ id: Date.now(), name: "Chat 1", messages: [] }];
+    const next = updated.length ? updated : fallback;
+    setChats(next);
+    if (id === currentChatId) {
+      setCurrentChatId(next[0].id);
     }
   };
 
   const renameChat = (id) => {
     const newName = prompt("Enter chat name:");
     if (!newName) return;
-
     setChats((prev) =>
-      prev.map((chat) =>
-        chat.id === id ? { ...chat, name: newName } : chat
-      )
+      prev.map((chat) => (chat.id === id ? { ...chat, name: newName } : chat))
     );
   };
 
@@ -189,8 +184,7 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
             padding: "10px",
             borderRadius: "6px",
             border: "none",
-            width: "100%",
-            cursor: "pointer"
+            width: "100%"
           }}
         />
 
@@ -217,16 +211,18 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
                 justifyContent: "space-between",
                 alignItems: "center",
                 cursor: "pointer",
-                width: "100%"
+                background:
+                  chat.id === currentChatId
+                    ? "rgba(255,255,255,0.15)"
+                    : "transparent"
               }}
             >
-              <span onClick={() => setCurrentChatId(chat.id)}>
+              <span onClick={() => setCurrentChatId(chat.id)} style={{ flex: 1 }}>
                 {chat.name}
               </span>
-
               <div style={{ display: "flex", gap: "6px" }}>
-                <span onClick={() => renameChat(chat.id)}>✏️</span>
-                <span onClick={() => deleteChat(chat.id)}>🗑️</span>
+                <span onClick={() => renameChat(chat.id)} style={{ cursor: "pointer" }}>✏️</span>
+                <span onClick={() => deleteChat(chat.id)} style={{ cursor: "pointer" }}>🗑️</span>
               </div>
             </div>
           ))}
@@ -237,42 +233,42 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
 
         {/* Messages */}
-        <div
-          style={{
-            flex: 1,
-            padding: "20px",
-            overflowY: "auto"
-          }}
-        >
+        <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
           {currentChat.messages.map((msg, i) => (
             <div
               key={i}
               style={{
                 display: "flex",
-                justifyContent:
-                  msg.sender === "user" ? "flex-end" : "flex-start",
+                justifyContent: msg.sender === "user" ? "flex-end" : "flex-start",
                 marginBottom: "10px"
               }}
             >
               <div
                 style={{
-                  background:
-                    msg.sender === "user" ? "#ff9800" : "#ffffff",
-                  color: msg.sender === "user" ? "white" : "black",
-                  padding: "10px 14px",
+                  background: msg.sender === "user" ? "#ff9800" : "#ffffff",
+                  color: "black",
+                  padding: "12px 16px",
                   borderRadius: "15px",
-                  maxWidth: "60%"
+                  maxWidth: "60%",
+                  lineHeight: "1.8",
+                  color: msg.sender === "user" ? "white" : "black"
                 }}
               >
-                {msg.text}
-                <div style={{ fontSize: "10px", marginTop: "4px" }}>
+                {/* Plain text - server cleans all symbols */}
+                <div style={{ whiteSpace: "pre-line" }}>{msg.text}</div>
+
+                <div style={{ fontSize: "10px", marginTop: "4px", opacity: 0.7 }}>
                   {msg.time}
                 </div>
               </div>
             </div>
           ))}
 
-          {typing && <div>🤖 typing{dots}</div>}
+          {typing && (
+            <div style={{ color: dark ? "#ccc" : "#555", padding: "8px" }}>
+              🤖 typing{dots}
+            </div>
+          )}
 
           <div ref={chatEndRef} />
         </div>
@@ -283,7 +279,7 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
             display: "flex",
             padding: "10px",
             borderTop: "1px solid #ddd",
-            background: "white"
+            background: dark ? "#1e1e1e" : "white"
           }}
         >
           <input
@@ -295,10 +291,11 @@ const res = await fetch(`${BASE_URL}/chat`, { // ✅ FIXED
               flex: 1,
               padding: "10px",
               borderRadius: "20px",
-              border: "1px solid #ccc"
+              border: "1px solid #ccc",
+              background: dark ? "#2e2e2e" : "white",
+              color: dark ? "white" : "black"
             }}
           />
-
           <button
             onClick={sendMessage}
             style={{

@@ -6,10 +6,7 @@ function Auth({ setUser }) {
   const [password, setPassword] = useState("");
 
   // ✅ SMART BASE URL (IMPORTANT)
-  const BASE_URL =
-    window.location.hostname === "localhost"
-      ? "http://localhost:5000"
-      : "";
+  const BASE_URL = "http://localhost:5001";
 
   const handleSubmit = async () => {
     const endpoint = isLogin ? "login" : "signup";

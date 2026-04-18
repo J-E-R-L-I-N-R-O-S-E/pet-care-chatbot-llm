@@ -1,113 +1,106 @@
-console.log("🔥 AUTH VERSION RUNNING");
+console.log("🔥 AUTH + AI SERVER RUNNING");
 
-const express = require("express");
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+import express from "express";
+import cors from "cors";
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+import Groq from "groq-sdk";
+import { fileURLToPath } from "url";
 
-const data = require("./data.json");
+dotenv.config();
 
 const app = express();
 
-/**
- * ✅ CORS FIX (FOR DEPLOYMENT)
- */
-app.use(cors()); // allow all (important for Railway)
+// Fix __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-/**
- * 🤖 Chatbot Logic
- */
-function getResponse(message) {
-  if (!message) return "Please enter a message 😊";
-
-  message = message.toLowerCase();
-  const words = message.split(" ");
-
-  const synonyms = {
-    eat: "food",
-    eating: "food",
-    meal: "food",
-    diet: "food",
-    feed: "food",
-    feeding: "food",
-    sick: "health",
-    ill: "health",
-    vomiting: "health",
-    noteating: "health",
-    bath: "clean",
-    wash: "clean",
-    injection: "vaccine",
-    shot: "vaccine"
-  };
-
-  let normalizedWords = words.map((w) => synonyms[w] || w);
-
-  let bestMatch = null;
-  let maxScore = 0;
-
-  data.intents.forEach((intent) => {
-    let score = 0;
-
-    intent.keywords.forEach((keyword) => {
-      if (normalizedWords.includes(keyword)) score += 2;
-      else if (message.includes(keyword)) score += 1;
-    });
-
-    if (score > maxScore) {
-      maxScore = score;
-      bestMatch = intent;
-    }
-  });
-
-  if (bestMatch && maxScore > 0) {
-    const responses = bestMatch.responses;
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  return "Hmm 🤔 I didn't understand. Ask about food, health, or care 🐾";
-}
+// Groq setup
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 /**
  * 💬 CHAT API
  */
-app.post("/chat", (req, res) => {
+app.post("/chat", async (req, res) => {
+  const userMessage = req.body.message;
+
+  if (!userMessage) {
+    return res.json({ reply: "Please type something." });
+  }
+
   try {
-    const userMessage = req.body.message;
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        {
+          role: "system",
+          content: `
+You are a pet care assistant.
 
-    console.log("📩 User:", userMessage);
+Give clean, well-structured answers:
+- No symbols like ** or ###
+- Use simple headings and bullet points
+- Keep it neat and readable
 
-    if (!userMessage) {
-      return res.json({ reply: "Message is required!" });
-    }
+Example:
 
-    const botReply = getResponse(userMessage);
+Feeding Your Dog
 
-    console.log("🤖 Bot:", botReply);
+• Feed twice daily
+• Use quality food
+• Provide fresh water
+          `,
+        },
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ],
+    });
 
-    res.json({ reply: botReply });
+    const rawReply = completion.choices[0].message.content;
+
+    const cleanReply = rawReply
+      .replace(/#{1,6}\s*/g, "")        // remove # ## ###
+      .replace(/\*\*(.+?)\*\*/g, "$1")  // remove **bold**
+      .replace(/\*(.+?)\*/g, "$1")      // remove *italic*
+      .replace(/\+\s*/g, "• ")          // convert + to bullet
+      .replace(/\*\s*/g, "• ")          // convert * to bullet
+      .replace(/\n{3,}/g, "\n\n")       // remove extra blank lines
+      .trim();
+
+    res.json({ reply: cleanReply });
 
   } catch (error) {
-    console.error("❌ Chat Error:", error);
-    res.status(500).json({ reply: "Server error ❌" });
+    console.error("AI ERROR:", error.message);
+    res.status(500).json({ reply: "AI error occurred." });
   }
 });
 
 /**
- * 🔐 AUTH
+ * 🔐 AUTH SYSTEM
  */
 const usersFile = path.join(__dirname, "users.json");
 
+// Create file if not exists
 if (!fs.existsSync(usersFile)) {
   fs.writeFileSync(usersFile, "[]");
 }
 
+// Signup
 app.post("/signup", (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password)
+  if (!username || !password) {
     return res.json({ message: "All fields required" });
+  }
 
   const users = JSON.parse(fs.readFileSync(usersFile));
 
@@ -121,6 +114,7 @@ app.post("/signup", (req, res) => {
   res.json({ message: "Signup successful" });
 });
 
+// Login
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -130,20 +124,22 @@ app.post("/login", (req, res) => {
     (u) => u.username === username && u.password === password
   );
 
-  if (!user) return res.json({ message: "Invalid credentials" });
+  if (!user) {
+    return res.json({ message: "Invalid credentials" });
+  }
 
   res.json({ message: "Login successful", user });
 });
 
 /**
- * 🧪 TEST
+ * 🧪 TEST ROUTE
  */
 app.get("/check", (req, res) => {
   res.send("CHECK WORKING ✅");
 });
 
 /**
- * 🌐 SERVE FRONTEND (IMPORTANT FOR DEPLOY)
+ * 🌐 SERVE FRONTEND (FOR DEPLOYMENT)
  */
 app.use(express.static(path.join(__dirname, "dist")));
 
@@ -152,9 +148,9 @@ app.get("*", (req, res) => {
 });
 
 /**
- * 🚀 START
+ * 🚀 START SERVER
  */
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
