@@ -1,5 +1,5 @@
 console.log("🔥 AUTH + AI SERVER RUNNING");
-
+console.log("🔥 NEW DEPLOY VERSION 2");
 import express from "express";
 import cors from "cors";
 import fs from "fs";
