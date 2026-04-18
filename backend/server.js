@@ -79,7 +79,7 @@ Feeding Your Dog
     res.json({ reply: cleanReply });
 
   } catch (error) {
-    console.error("AI ERROR:", error.message);
+    console.error("AI ERROR:", error);
     res.status(500).json({ reply: "AI error occurred." });
   }
 });
