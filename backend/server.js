@@ -155,3 +155,9 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+app.get("/", (req, res) => {
+  res.send("🚀 Pet Care AI Backend Running");
+});
