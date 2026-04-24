@@ -1,3 +1,4 @@
+console.log("🚨 THIS IS NEW SERVER FILE 🚨");
 console.log("🔥 AUTH + AI SERVER RUNNING");
 console.log("🔥 NEW DEPLOY VERSION 2");
 import express from "express";
@@ -144,12 +145,7 @@ app.get("/check", (req, res) => {
  */
 app.get("/health", (req, res) => {
   console.log("🔥 HEALTH HIT - NEW VERSION");
-  res.json({
-    status: "OK",
-    uptime: process.uptime(),
-    model: "LLM",
-    time: new Date()
-  });
+  res.send("NEW HEALTH WORKING 🚀");
 });
 
 app.get("/api", (req, res) => {
