@@ -143,7 +143,8 @@ app.get("/check", (req, res) => {
  * ✅ API ROUTES FIRST
  */
 app.get("/health", (req, res) => {
-  res.status(200).json({
+  console.log("🔥 HEALTH HIT - NEW VERSION");
+  res.json({
     status: "OK",
     uptime: process.uptime(),
     model: "LLM",
