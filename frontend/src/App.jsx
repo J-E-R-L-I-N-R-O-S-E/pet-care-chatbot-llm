@@ -71,8 +71,8 @@ function App() {
     try {
       const BASE_URL =
         window.location.hostname === "localhost"
-          ? "http://localhost:5001"
-          : "";
+            ? "http://localhost:5001"
+            : window.location.origin;
 
       const res = await fetch(`${BASE_URL}/chat`, {
         method: "POST",

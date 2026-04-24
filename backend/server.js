@@ -144,8 +144,14 @@ app.get("/check", (req, res) => {
  * ✅ API ROUTES FIRST
  */
 app.get("/health", (req, res) => {
-  console.log("🔥 HEALTH HIT - NEW VERSION");
-  res.send("NEW HEALTH WORKING 🚀");
+  res.set("Cache-Control", "no-store");
+
+  res.json({
+    status: "OK",
+    uptime: process.uptime(),
+    model: "LLM",
+    time: new Date()
+  });
 });
 
 app.get("/api", (req, res) => {
@@ -156,10 +162,10 @@ app.get("/api", (req, res) => {
 /**
  * 🌐 SERVE FRONTEND (FOR DEPLOYMENT)
  */
-app.use(express.static(path.join(__dirname, "dist")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
 
